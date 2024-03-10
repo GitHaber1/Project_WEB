@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+{% extends 'base.html' %}
+{% block content %} {% endblock content %}
+<ul>
+    {% for c in contacts %}
+    {% if not c.is_private %}
+    <li>
+        <h2>{{c.title}}</h2>
+        <p >{{c.content}}</p>
+        <p ><a href="{% url 'info' c.id %}">Additional info</a></p>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+</body>
+</html>
