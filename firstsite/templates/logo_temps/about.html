@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{title}}</title>
-</head>
-<body>
 {% extends 'base.html' %}
-{% block content %} {% endblock content %}
+{% block content %}
 <ul>
     {% for c in contacts %}
     {% if not c.is_private %}
@@ -20,5 +14,4 @@
     {% endif %}
     {% endfor %}
 </ul>
-</body>
-</html>
+{% endblock content %}

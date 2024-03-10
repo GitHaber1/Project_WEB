@@ -28,7 +28,7 @@ def index(request):
         'obj': MyClass(10, 20),
     }
 
-    return render(request, 'logo/index.html', context=data)
+    return render(request, 'logo_temps/index.html', context=data)
 
 
 def login(request):
@@ -67,7 +67,7 @@ def about(request):
         'menu': menu,
         'contacts': data_db,
     }
-    return render(request, 'logo/about.html', data)
+    return render(request, 'logo_temps/about.html', data)
 
 
 def show_additional_info(request, id):
