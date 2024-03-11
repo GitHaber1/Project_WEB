@@ -1,10 +1,18 @@
+{% load static %}
+{% load logo_tags %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>{{title}}</title>
+    <link type="text/css" href="{% static 'logo/css/def_style.css' %}" rel="stylesheet">
 </head>
 <body>
 <h1>{{title}}</h1>
+{% get_categories as categories %}
+<ul id="leftchapters">
+    <li class="selected">Categories</li>
+    {% show_categories %}
+</ul>
 <ul>
     <li><a href="{% url 'home' %}">Main page</a></li>
     {% for m in menu %}

@@ -9,6 +9,12 @@ menu = [{'title': 'Login', 'url_name': 'login'},
             {'title': 'About', 'url_name': 'about'}]
 
 
+cats_db = [
+    {'id': 1, 'name': 'C++'},
+    {'id': 2, 'name': 'C#'},
+]
+
+
 class MyClass:
  def __init__(self, a, b):
     self.a = a
@@ -59,8 +65,10 @@ def archive(request, year):
 
 def about(request):
     data_db = [
-        {'id': 1, 'title': 'Creator of site', 'content': 'creator@gmail.com', 'is_private': True, 'info': '+78888888888'},
-        {'id': 2, 'title': 'Support team', 'content': 'support_site@gmail.com', 'is_private': False, 'info':'+78888888881'}
+        {'id': 1, 'title': 'Creator of site', 'content': 'Email: creator@gmail.com', 'is_private': True, 'info': '+78888888888'},
+        {'id': 2, 'title': 'Support team', 'content': 'Our support team, which can help you!'
+                                                      '\nEmail: support_site@gmail.com', 'is_private': False, 'info':'+78888888881'}
+
     ]
     data = {
         'title': 'About site',
@@ -68,6 +76,10 @@ def about(request):
         'contacts': data_db,
     }
     return render(request, 'logo_temps/about.html', data)
+
+
+def show_category(request, cat_id):
+    return index(request)
 
 
 def show_additional_info(request, id):

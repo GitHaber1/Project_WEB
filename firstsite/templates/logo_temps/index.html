@@ -1,19 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{title}}</title>
-</head>
-<body>
-<h1>{{title|upper}}</h1>
-
-<ul>
-    <li><a href="{% url 'home' %}">Main page</a></li>
-    {% for m in menu %}
-    {% if not forloop.last %}<li>{% else %}<li class="last">{% endif %}
-    <a href="{% url m.url_name %}">{{m.title}}</a>
-</li>
-    {% endfor %}
-</ul>
+{% extends 'base.html' %}
+{% block content %}
 <p >URL is {{url}}</p>
 <p >Rounded 28.56 + 20 = {{float|add:"20"}}</p>
 <p >28 is a multiple of 2: {{float|divisibleby:"2"}}</p>
@@ -21,5 +7,4 @@
 <p >First element in set: {{set.pop}}</p>
 <p >First in dictionary: {{dict.key_1}}</p>
 <p >Object 'a' of MyClass: {{obj.a}}</p>
-</body>
-</html>
+{% endblock content %}
