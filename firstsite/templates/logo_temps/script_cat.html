@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<ul>
+    {% for p in posts %}
+    {% if p.is_published %}
+    <li>
+        <h2>{{p.title}}</h2>
+        <a href="{{ p.url }}">Read more</a>
+        {% if not forloop.last %}
+        <hr>
+        {% endif %}
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% endblock content %}

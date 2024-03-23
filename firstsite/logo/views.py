@@ -1,7 +1,9 @@
 import django
 import django.http
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import slugify
+from logo.models import ScriptPost
+from django.urls import reverse
 
 # Create your views here.
 
@@ -78,8 +80,31 @@ def about(request):
     return render(request, 'logo_temps/about.html', data)
 
 
+def show_post(request, cat_id, post_slug):
+    post = get_object_or_404(ScriptPost, slug=post_slug)
+    return render(request, 'logo_temps/show_post.html', {'post': post, 'title': 'Code', 'menu': menu})
+
+
 def show_category(request, cat_id):
-    return index(request)
+    if (cat_id == 1):
+        title = 'C++ scripts'
+        category_name = ScriptPost.CategoryChoices.CATEGORY_CPP
+    elif (cat_id == 2):
+        title = 'C# scripts'
+        category_name = ScriptPost.CategoryChoices.CATEGORY_CS
+
+    posts = ScriptPost.published.all().filter(category=category_name)
+
+    data = {
+        'title': title,
+        'menu': menu,
+        'posts': posts
+    }
+
+    for post in posts:
+        post.url = reverse('show_post', args=[cat_id, post.slug])
+
+    return render(request, 'logo_temps/script_cat.html', data)
 
 
 def show_additional_info(request, id):
