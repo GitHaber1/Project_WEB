@@ -1,0 +1,10 @@
+{% if tags %}
+<p>Tags:</p>
+<ul class="tags-list">
+    {% for t in tags %}
+    <li>
+        <a href="{% url 'tag' cat_slug=current_cat_slug tag_slug=t.slug %}" class="tag">{{t.tag}}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}

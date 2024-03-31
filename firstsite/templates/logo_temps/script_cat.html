@@ -1,10 +1,18 @@
 {% extends 'base.html' %}
+{% load logo_tags %}
+{% block tagblock %}
+<li>
+    {% show_all_tags cat_slug=current_cat_slug %}
+</li>
+{% endblock tagblock %}
+
 {% block content %}
 <ul>
     {% for p in posts %}
     {% if p.is_published %}
     <li>
         <h2>{{p.title}}</h2>
+        <p class="first">Date: {{p.time_update|date:"d-m-Y H:i:s"}}</p>
         <a href="{{ p.url }}">Read more</a>
         {% if not forloop.last %}
         <hr>

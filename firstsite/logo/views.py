@@ -2,19 +2,13 @@ import django
 import django.http
 from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import slugify
-from logo.models import ScriptPost
+from logo.models import ScriptPost, Category, TagPost
 from django.urls import reverse
 
 # Create your views here.
 
 menu = [{'title': 'Login', 'url_name': 'login'},
-            {'title': 'About', 'url_name': 'about'}]
-
-
-cats_db = [
-    {'id': 1, 'name': 'C++'},
-    {'id': 2, 'name': 'C#'},
-]
+        {'title': 'About', 'url_name': 'about'}]
 
 
 class MyClass:
@@ -80,35 +74,48 @@ def about(request):
     return render(request, 'logo_temps/about.html', data)
 
 
-def show_post(request, cat_id, post_slug):
+def show_post(request, cat_slug, post_slug):
     post = get_object_or_404(ScriptPost, slug=post_slug)
-    return render(request, 'logo_temps/show_post.html', {'post': post, 'title': 'Code', 'menu': menu})
+    return render(request, 'logo_temps/show_post.html', {'post': post, 'title': post.title, 'menu': menu, 'current_cat_slug': cat_slug})
 
 
-def show_category(request, cat_id):
-    if (cat_id == 1):
-        title = 'C++ scripts'
-        category_name = ScriptPost.CategoryChoices.CATEGORY_CPP
-    elif (cat_id == 2):
-        title = 'C# scripts'
-        category_name = ScriptPost.CategoryChoices.CATEGORY_CS
-
-    posts = ScriptPost.published.all().filter(category=category_name)
+def show_category(request, cat_slug):
+    current_cat = get_object_or_404(Category, slug=cat_slug)
+    title = current_cat.name
+    posts = ScriptPost.published.all().filter(cat_id=current_cat.pk)
 
     data = {
         'title': title,
         'menu': menu,
-        'posts': posts
+        'posts': posts,
+        'current_cat_slug': cat_slug,
     }
 
     for post in posts:
-        post.url = reverse('show_post', args=[cat_id, post.slug])
+        post.url = reverse('show_post', args=[cat_slug, post.slug])
 
-    return render(request, 'logo_temps/script_cat.html', data)
+    return render(request, 'logo_temps/script_cat.html', context=data)
 
 
 def show_additional_info(request, id):
     return django.shortcuts.HttpResponse(f"<h1>Additional contact info with id: {id}</h1>")
+
+
+def show_tag_postlist(request, cat_slug, tag_slug):
+    tag = get_object_or_404(TagPost, slug=tag_slug)
+    current_cat = get_object_or_404(Category, slug=cat_slug)
+    posts = tag.tags.filter(is_published=ScriptPost.Status.PUBLISHED, cat_id=current_cat.pk)
+    data = {
+        'title': f'Tag: {tag.tag}',
+        'menu': menu,
+        'posts': posts,
+        'current_cat_slug': cat_slug,
+    }
+
+    for post in posts:
+        post.url = reverse('show_post', args=[cat_slug, post.slug])
+
+    return render(request, 'logo_temps/script_cat.html', context=data)
 
 
 def page_not_found(request, exception):

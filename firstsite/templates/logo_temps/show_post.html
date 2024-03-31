@@ -1,7 +1,22 @@
 {% extends 'base.html' %}
+{% block posttag %}
+{% with post.tags.all as tags %}
+{% if tags %}
+<ul class="posttags-list">
+    <li>Tags:</li>
+    {% for t in tags %}
+    <li>
+        <a href="{% url 'tag' cat_slug=current_cat_slug tag_slug=t.slug %}" class="tag">{{t.tag}}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock posttag %}
+
 {% block content %}
 <div>
-    <h1>{{ post.title }}</h1>
+    <h2>Code</h2>
     <div>{{ post.content|linebreaksbr }}</div>
 </div>
 {% endblock content %}

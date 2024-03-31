@@ -12,6 +12,7 @@ urlpatterns = [
     path('archive/<year4:year>/', views.archive, name='archive'),
     path('about/', views.about, name='about'),
     path('info/<int:id>', views.show_additional_info, name='info'),
-    path('category/<int:cat_id>', views.show_category, name='category'),
-    path('category/<int:cat_id>/post/<slug:post_slug>/', views.show_post, name='show_post'),
+    path('category/<slug:cat_slug>', views.show_category, name='category'),
+    path('category/<slug:cat_slug>/post/<slug:post_slug>/', views.show_post, name='show_post'),
+    path('category/<slug:cat_slug>/tag/<slug:tag_slug>', views.show_tag_postlist, name='tag'),
 ]
