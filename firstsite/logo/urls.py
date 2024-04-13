@@ -1,6 +1,7 @@
 import django.urls.converters
 from django.urls import path
 from logo import views, converters
+from .admin import admin
 
 django.urls.converters.register_converter(converters.FourDigitYearConverter, "year4")
 
@@ -16,3 +17,6 @@ urlpatterns = [
     path('category/<slug:cat_slug>/post/<slug:post_slug>/', views.show_post, name='show_post'),
     path('category/<slug:cat_slug>/tag/<slug:tag_slug>', views.show_tag_postlist, name='tag'),
 ]
+
+admin.site.site_header = "Панель администрирования"
+admin.site.index_title = "Пользовательские публикации"

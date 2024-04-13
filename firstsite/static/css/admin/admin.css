@@ -1,0 +1,43 @@
+body {
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: whitesmoke;
+}
+
+.required {
+    color: blueviolet;
+}
+
+#icon-auto, #icon-moon, #icon-sun {
+    color: blueviolet;
+}
+
+.submit-row input {
+    background-color: blueviolet !important;
+}
+
+.submit-row input:hover {
+    background-color: rgb(176, 92, 255) !important;
+}
+
+p.paginator input {
+    background-color: blueviolet !important;
+}
+
+#header, .module caption{
+    -webkit-text-fill-color: whitesmoke;
+    background-color: blueviolet;
+}
+
+div.breadcrumbs {
+    background-color:rgb(163, 68, 252);
+    color: whitesmoke;
+}
+
+div.breadcrumbs a {
+    color: whitesmoke;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    color: whitesmoke;
+    background: blueviolet;
+}

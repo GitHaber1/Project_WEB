@@ -1,9 +1,11 @@
 body {
     font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: whitesmoke;
+    background-color: rgb(35, 35, 35);
 }
 
-h1 {            
-    color:blueviolet;
+h1 {          
+    color: whitesmoke;
 }
 
 li {
@@ -14,8 +16,22 @@ p {
     font-size: 24px;
 }
 
+a:visited{
+    color: whitesmoke;
+}
+
+a:active{
+    color: whitesmoke;
+}
+
 a {   
+    text-decoration:underline;
+    color:whitesmoke;
     font-size: 24px;
+}
+
+.selected {
+    list-style-type: none;
 }
 
 .tag {
@@ -24,6 +40,7 @@ a {
 
 .sidebar {
     float: left;
+    background-color:rgb(18, 18, 18);
     width: 200px;
     font-size: 5px; 
 }
