@@ -11,7 +11,7 @@
 {% get_categories as categories %}
 <div class="sidebar">
     <ul>
-        <li><a href="{% url 'home' %}">Main page</a></li>
+        <li><a href="{% url 'home' %}">Главная страница</a></li>
         {% for m in menu %}
         {% if not forloop.last %}<li>{% else %}<li class="last">{% endif %}
         <a href="{% url m.url_name %}">{{m.title}}</a>
@@ -19,7 +19,7 @@
         {% endfor %}
     </ul>
     <ul id="leftchapters">
-    <li class="selected">Categories</li>
+    <li class="selected">Категории</li>
         {% show_categories %}
         {% block tagblock %} {% endblock tagblock %}
     </ul>

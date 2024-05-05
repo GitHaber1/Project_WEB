@@ -20,5 +20,15 @@
     <div>{{ post.content|linebreaksbr }}</div>
     <h2>Описание</h2>
     <div>{{ post.about|linebreaksbr }}</div>
+    {% if post.screenshot.all.exists %}
+    <h2>Скриншоты</h2>
+    <div class="screenshots">
+        <div class="screenshot-container">
+        {% for screenshot in post.screenshot.all %}
+            <img src="{{ screenshot.screenshot.url }}" alt="Скриншот поста">
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock content %}

@@ -24,8 +24,25 @@ a:active{
     color: whitesmoke;
 }
 
+label {
+    font-size: 24px;
+}
+
+.form-p {
+    margin: 3px;
+}
+
+.screenshot-container{
+    display: flex;
+}
+
+.screenshot-container img{
+    margin-right: 10px;
+    width: 300px;
+}
+
 a {   
-    text-decoration:underline;
+    text-decoration:underline;    
     color:whitesmoke;
     font-size: 24px;
 }
@@ -41,10 +58,10 @@ a {
 .sidebar {
     float: left;
     background-color:rgb(18, 18, 18);
-    width: 200px;
+    width: 300px;
     font-size: 5px; 
 }
 
 .content {
-    margin-left: 220px; 
+    margin-left: 340px; 
 }

@@ -1,14 +1,16 @@
 import django
 import django.http
-from django.shortcuts import render, get_object_or_404
+import uuid
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from logo.models import ScriptPost, Category, TagPost
+from logo.models import ScriptPost, Category, TagPost, Screenshots
 from django.urls import reverse
+from .forms import AddPostForm, UploadFileForm, AddPostFullForm
 
 # Create your views here.
 
-menu = [{'title': 'Login', 'url_name': 'login'},
-        {'title': 'About', 'url_name': 'about'}]
+menu = [{'title': 'Вход', 'url_name': 'login'},
+        {'title': 'О сайте', 'url_name': 'about'}]
 
 
 class MyClass:
@@ -37,26 +39,26 @@ def login(request):
     return django.shortcuts.HttpResponse("Login")
 
 
-def categories(request, cat_id):
-    return django.shortcuts.HttpResponse(f"<h1>Categories of logo</h1><p >id:{cat_id}</p>")
+# def categories(request, cat_id):
+#     return django.shortcuts.HttpResponse(f"<h1>Categories of logo</h1><p >id:{cat_id}</p>")
 
 
-def categories_by_slug(request, cat_slug):
-    if request.GET:
-        print(request.GET)
+# def categories_by_slug(request, cat_slug):
+#     if request.GET:
+#         print(request.GET)
+#
+#     if request.POST:
+#         print(request.POST)
+#
+#     return django.shortcuts.HttpResponse(f"<h1>Categories of logo</h1><p >slug:{cat_slug}</p>")
 
-    if request.POST:
-        print(request.POST)
 
-    return django.shortcuts.HttpResponse(f"<h1>Categories of logo</h1><p >slug:{cat_slug}</p>")
-
-
-def archive(request, year):
-    url_redirect = django.shortcuts.reverse('categories', args=('args', ))
-    if year > 2024:
-        return django.shortcuts.redirect(url_redirect)
-
-    return django.shortcuts.HttpResponse(f"<h1>Archive by years</h1><p >{year}</p>")
+# def archive(request, year):
+#     url_redirect = django.shortcuts.reverse('categories', args=('args', ))
+#     if year > 2024:
+#         return django.shortcuts.redirect(url_redirect)
+#
+#     return django.shortcuts.HttpResponse(f"<h1>Archive by years</h1><p >{year}</p>")
 
 
 def about(request):
@@ -116,6 +118,58 @@ def show_tag_postlist(request, cat_slug, tag_slug):
         post.url = reverse('show_post', args=[cat_slug, post.slug])
 
     return render(request, 'logo_temps/script_cat.html', context=data)
+
+
+def add_page(request):
+    if request.method == 'POST':
+        form = AddPostFullForm(request.POST, request.FILES)
+        if form.is_valid():
+            print(form.cleaned_data)
+            try:
+                # Потом здесь реализовать добавление автора
+                post = form.save(commit=False)
+                post.save()
+
+                files = request.FILES.getlist('screenshot')
+
+                for file in files:
+                    screen = Screenshots(screenshot=file, post=post)
+                    screen.save()
+                    post.screenshot.add(screen)
+
+                return redirect('home')
+            except Exception as e:
+                print(f"Ошибка при сохранении поста: {e}")
+                form.add_error(None, 'Не удалось добавить пост')
+    else:
+        form = AddPostFullForm()
+    return render(request, 'logo_temps/add_page.html', {'menu': menu, 'title': 'Добавление статьи', 'form': form})
+
+
+def handle_uploaded_file(f):
+    name = f.name
+    ext = ''
+
+    if '.' in name:
+        ext = name[name.rindex('.'):]
+        name = name[:name.rindex('.')]
+
+    suffix = str(uuid.uuid4())
+
+    with open(f"uploads/{name}_{suffix}{ext}", "wb+") as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+
+def upload(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(form.cleaned_data['file'])
+    else:
+        form = UploadFileForm()
+
+    return render(request, 'logo_temps/upload.html', {'title': 'Загрузка файлов', 'menu': menu, 'form': form})
 
 
 def page_not_found(request, exception):

@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import ScriptPost, Category
+from django.utils.html import format_html
+
+from .models import ScriptPost, Category, Screenshots
 from django.db.models import Q
 
 # Register your models here.
@@ -25,6 +27,20 @@ class AuthorFilter(admin.SimpleListFilter):
             return queryset.filter(author__sp_count__gte=10)
 
 
+class ScreenshotsInline(admin.TabularInline):
+    model = Screenshots
+    extra = 1
+
+    def get_image(self, obj):
+        if obj.screenshot:
+            return format_html('<img src="{}" width="100" height="100" />', obj.screenshot.url)
+        return '-'
+
+    get_image.short_description = 'Изображение'
+    readonly_fields = ('get_image',)
+    fields = ('screenshot', 'get_image',)
+
+
 @admin.register(ScriptPost)
 class ScriptPostAdmin(admin.ModelAdmin):
     fields = ['title', 'slug', 'content', 'about', 'cat_id', 'author', 'tags', 'is_published']
@@ -38,6 +54,8 @@ class ScriptPostAdmin(admin.ModelAdmin):
     actions = ['set_published', 'set_draft']
     search_fields = ['title__startswith', 'cat_id__name']
     list_filter = [AuthorFilter, 'cat_id__name', 'is_published']
+
+    inlines = [ScreenshotsInline]
 
     @admin.display(description='Размер кода')
     def brief_info(self, post: ScriptPost):
