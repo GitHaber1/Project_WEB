@@ -1,149 +1,215 @@
 import django
 import django.http
 import uuid
+from django.views import View
+from .utils import DataMixin
+from django.core.paginator import Paginator
+from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView, DeleteView
+from django.core.files.storage import default_storage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from logo.models import ScriptPost, Category, TagPost, Screenshots
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from .forms import AddPostForm, UploadFileForm, AddPostFullForm
 
 # Create your views here.
 
 menu = [{'title': 'Вход', 'url_name': 'login'},
+        {'title': 'Написать пост', 'url_name': 'create_post'},
         {'title': 'О сайте', 'url_name': 'about'}]
 
 
-class MyClass:
- def __init__(self, a, b):
-    self.a = a
-    self.b = b
+class LogoIndex(DataMixin, ListView):
+    model = ScriptPost
+    template_name = 'logo_temps/index.html'
 
-
-def index(request):
-    data = {
-        'title': 'This is logo',
-        'menu': menu,
-        'url': slugify("This is logo"),
-        'float': 28.56,
-        'lst': [1, 2, 'abc', True],
-        'set': {1, 1, 2, 3, 2, 5},
-        'dict': {'key_1': 'value_1', 'key_2':
-            'value_2'},
-        'obj': MyClass(10, 20),
-    }
-
-    return render(request, 'logo_temps/index.html', context=data)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return self.get_mixin_context(super().get_context_data(**kwargs), title='This is logo')
 
 
 def login(request):
     return django.shortcuts.HttpResponse("Login")
 
 
-# def categories(request, cat_id):
-#     return django.shortcuts.HttpResponse(f"<h1>Categories of logo</h1><p >id:{cat_id}</p>")
+class LogoAbout(DataMixin, ListView):
+    model = ScriptPost
+    template_name = 'logo_temps/about.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        data_db = [
+            {'id': 1, 'title': 'Creator of site', 'content': 'Email: creator@gmail.com', 'is_private': True,
+             'info': '+78888888888'},
+            {'id': 2, 'title': 'Support team', 'content': 'Our support team, which can help you!'
+                                                          '\nEmail: support_site@gmail.com', 'is_private': False,
+             'info': '+78888888881'}
+        ]
+        return self.get_mixin_context(super().get_context_data(**kwargs), title='О сайте', contacts=data_db)
 
 
-# def categories_by_slug(request, cat_slug):
-#     if request.GET:
-#         print(request.GET)
-#
-#     if request.POST:
-#         print(request.POST)
-#
-#     return django.shortcuts.HttpResponse(f"<h1>Categories of logo</h1><p >slug:{cat_slug}</p>")
+class ShowPost(DataMixin, DetailView):
+    model = ScriptPost
+    template_name = 'logo_temps/show_post.html'
+    context_object_name = 'post'
+    slug_url_kwarg = 'post_slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = context['post']
+        return self.get_mixin_context(context, title=post.title, current_cat_slug=self.kwargs.get('cat_slug'))
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(ScriptPost, slug=self.kwargs[self.slug_url_kwarg])
 
 
-# def archive(request, year):
-#     url_redirect = django.shortcuts.reverse('categories', args=('args', ))
-#     if year > 2024:
-#         return django.shortcuts.redirect(url_redirect)
-#
-#     return django.shortcuts.HttpResponse(f"<h1>Archive by years</h1><p >{year}</p>")
+class ScriptCategory(DataMixin, ListView):
+    allow_empty = False
+    template_name = 'logo_temps/script_cat.html'
+    context_object_name = 'posts'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cat_slug = self.kwargs.get('cat_slug')
+        current_cat = get_object_or_404(Category, slug=cat_slug)
 
-def about(request):
-    data_db = [
-        {'id': 1, 'title': 'Creator of site', 'content': 'Email: creator@gmail.com', 'is_private': True, 'info': '+78888888888'},
-        {'id': 2, 'title': 'Support team', 'content': 'Our support team, which can help you!'
-                                                      '\nEmail: support_site@gmail.com', 'is_private': False, 'info':'+78888888881'}
+        for post in context['posts']:
+            post.url = reverse('show_post', args=[cat_slug, post.slug])
 
-    ]
-    data = {
-        'title': 'About site',
-        'menu': menu,
-        'contacts': data_db,
-    }
-    return render(request, 'logo_temps/about.html', data)
+        return self.get_mixin_context(context, title=current_cat.name, current_cat_slug=cat_slug)
 
-
-def show_post(request, cat_slug, post_slug):
-    post = get_object_or_404(ScriptPost, slug=post_slug)
-    return render(request, 'logo_temps/show_post.html', {'post': post, 'title': post.title, 'menu': menu, 'current_cat_slug': cat_slug})
-
-
-def show_category(request, cat_slug):
-    current_cat = get_object_or_404(Category, slug=cat_slug)
-    title = current_cat.name
-    posts = ScriptPost.published.all().filter(cat_id=current_cat.pk)
-
-    data = {
-        'title': title,
-        'menu': menu,
-        'posts': posts,
-        'current_cat_slug': cat_slug,
-    }
-
-    for post in posts:
-        post.url = reverse('show_post', args=[cat_slug, post.slug])
-
-    return render(request, 'logo_temps/script_cat.html', context=data)
+    def get_queryset(self):
+        return ScriptPost.published.filter(cat_id__slug=self.kwargs['cat_slug']).select_related('cat_id')
 
 
 def show_additional_info(request, id):
     return django.shortcuts.HttpResponse(f"<h1>Additional contact info with id: {id}</h1>")
 
 
-def show_tag_postlist(request, cat_slug, tag_slug):
-    tag = get_object_or_404(TagPost, slug=tag_slug)
-    current_cat = get_object_or_404(Category, slug=cat_slug)
-    posts = tag.tags.filter(is_published=ScriptPost.Status.PUBLISHED, cat_id=current_cat.pk)
-    data = {
-        'title': f'Tag: {tag.tag}',
-        'menu': menu,
-        'posts': posts,
-        'current_cat_slug': cat_slug,
-    }
+class TagPostList(DataMixin, ListView):
+    template_name = 'logo_temps/script_cat.html'
+    context_object_name = 'posts'
+    allow_empty = True
 
-    for post in posts:
-        post.url = reverse('show_post', args=[cat_slug, post.slug])
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag_slug = self.kwargs.get('tag_slug')
+        cat_slug = self.kwargs.get('cat_slug')
+        tag = get_object_or_404(TagPost, slug=tag_slug)
 
-    return render(request, 'logo_temps/script_cat.html', context=data)
+        for post in context['posts']:
+            post.url = reverse('show_post', args=[cat_slug, post.slug])
+
+        return self.get_mixin_context(context, title=tag.tag, current_cat_slug=cat_slug)
+
+    def get_queryset(self):
+        return ScriptPost.published.filter(tags__slug=self.kwargs['tag_slug'],
+                                           cat_id__slug=self.kwargs['cat_slug']).select_related('cat_id')
 
 
-def add_page(request):
-    if request.method == 'POST':
-        form = AddPostFullForm(request.POST, request.FILES)
+class AddPage(DataMixin, CreateView):
+    model = ScriptPost
+    form_class = AddPostFullForm
+    template_name = 'logo_temps/add_page.html'
+    success_url = reverse_lazy('home')
+    title_page = 'Добавление записи'
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
-            print(form.cleaned_data)
             try:
-                # Потом здесь реализовать добавление автора
+                # АВТОР
                 post = form.save(commit=False)
                 post.save()
 
-                files = request.FILES.getlist('screenshot')
+                tags = form.cleaned_data.get('tags')
+                if tags:
+                    post.tags.set(tags)
 
+                files = request.FILES.getlist('screenshot')
                 for file in files:
                     screen = Screenshots(screenshot=file, post=post)
                     screen.save()
                     post.screenshot.add(screen)
 
-                return redirect('home')
+                return redirect(self.success_url)
             except Exception as e:
                 print(f"Ошибка при сохранении поста: {e}")
                 form.add_error(None, 'Не удалось добавить пост')
-    else:
-        form = AddPostFullForm()
-    return render(request, 'logo_temps/add_page.html', {'menu': menu, 'title': 'Добавление статьи', 'form': form})
+
+        return render(request, self.template_name, {'form': form, **self.extra_context})
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form, **self.extra_context})
+
+
+class UpdatePage(DataMixin, UpdateView):
+    model = ScriptPost
+    form_class = AddPostFullForm
+    template_name = 'logo_temps/add_page.html'
+    success_url = reverse_lazy('home')
+    title_page = 'Добавление записи'
+
+    def get_object(self, queryset=None):
+        post_id = self.kwargs.get('pk')
+        return get_object_or_404(ScriptPost, pk=post_id)
+
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
+        form = self.form_class(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            try:
+                post = form.save(commit=False)
+                post.save()
+
+                tags = form.cleaned_data.get('tags')
+                if tags:
+                    post.tags.set(tags)
+
+                new_files = request.FILES.getlist('screenshot')
+                old_files = post.screenshot.all()
+
+                for old_file in old_files:
+                    if old_file.screenshot not in new_files:
+                        default_storage.delete(old_file.screenshot.path)
+                        old_file.delete()
+
+                for file in new_files:
+                    if file not in [old_file.screenshot for old_file in old_files]:
+                        screen = Screenshots(screenshot=file, post=post)
+                        screen.save()
+                        post.screenshot.add(screen)
+
+                return redirect(self.success_url)
+            except Exception as e:
+                print(f"Ошибка при обновлении поста: {e}")
+                form.add_error(None, 'Не удалось обновить пост')
+
+        return render(request, self.template_name, {'form': form, **self.extra_context})
+
+    def get(self, request, *args, **kwargs):
+        post = self.get_object()
+        form = self.form_class(instance=post)
+        return render(request, self.template_name, {'form': form, **self.extra_context})
+
+
+class DeletePage(DeleteView):
+    model = ScriptPost
+    template_name = 'logo_temps/confirm_delete.html'
+    success_url = reverse_lazy('home')
+
+    def get_object(self, queryset=None):
+        post_id = self.kwargs.get('pk')
+        return get_object_or_404(ScriptPost, pk=post_id)
+
+    def delete(self, request, *args, **kwargs):
+        post = self.get_object()
+
+        screenshots = post.screenshot.all()
+        for screenshot in screenshots:
+            screenshot.screenshot.delete()
+            screenshot.delete()
+
+        return super().delete(request, *args, **kwargs)
 
 
 def handle_uploaded_file(f):

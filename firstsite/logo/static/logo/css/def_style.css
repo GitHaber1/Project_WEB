@@ -65,3 +65,65 @@ a {
 .content {
     margin-left: 340px; 
 }
+
+.list-pages ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;    
+}
+
+.list-pages li {
+    display: inline-block;
+    margin: 0 15px;        
+}
+
+.list-pages a {
+    font-size: 30px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: whitesmoke;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid whitesmoke;
+    transition: 0.5s background-color ease, 0.5s border-color ease;
+    position: relative;
+    margin: 5px;
+}
+
+.list-pages a:hover {
+    background-color: blueviolet;
+    color: whitesmoke;
+    border-color: rgb(35, 35, 35);;
+}
+
+.page-num-selected a {
+    background-color: blueviolet;
+    color: white;
+    border-color: blueviolet;
+}
+
+.page-num-selected a:hover {
+    background-color: white;
+    color: blueviolet; 
+    border-color: blueviolet; 
+}
+
+.page-num-selected {
+    font-size: 33px;
+    color: blueviolet;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 48px; 
+    height: 48px; 
+    border-radius: 50%; 
+    border: 2px solid blueviolet; 
+    margin: 5px; 
+    box-sizing: border-box; 
+    line-height: -1; 
+}

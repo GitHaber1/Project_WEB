@@ -23,7 +23,7 @@ class ScriptPost(models.Model):
     objects = models.Manager()
     published = PublishedModel()
 
-    screenshot = models.ManyToManyField('Screenshots', blank=True, null=True, verbose_name='Скриншоты')
+    screenshot = models.ManyToManyField('Screenshots', blank=True, related_name='screenshots', verbose_name='Скриншоты')
     cat_id = models.ForeignKey('Category', on_delete=models.PROTECT, verbose_name='Категория')
     tags = models.ManyToManyField('TagPost', blank=True, related_name='tags', verbose_name='Тэги')
     author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True, blank=True, related_name='ascript', verbose_name='Автор')
@@ -43,7 +43,7 @@ class ScriptPost(models.Model):
 class Screenshots(models.Model):
     screenshot = models.ImageField(upload_to="uploads/%Y/%m/%d", blank=True, default=None, null=True,
                                    verbose_name='Скриншоты')
-    post = models.ForeignKey(ScriptPost, on_delete=models.CASCADE, blank=True, null=True)
+    post = models.ForeignKey(ScriptPost, on_delete=models.CASCADE, blank=True, default=None, null=True)
 
     class Meta:
         verbose_name = 'Скриншоты'
