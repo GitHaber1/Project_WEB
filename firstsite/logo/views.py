@@ -1,6 +1,9 @@
 import django
 import django.http
 import uuid
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views import View
 from .utils import DataMixin
 from django.core.paginator import Paginator
@@ -14,10 +17,6 @@ from .forms import AddPostForm, UploadFileForm, AddPostFullForm
 
 # Create your views here.
 
-menu = [{'title': 'Вход', 'url_name': 'login'},
-        {'title': 'Написать пост', 'url_name': 'create_post'},
-        {'title': 'О сайте', 'url_name': 'about'}]
-
 
 class LogoIndex(DataMixin, ListView):
     model = ScriptPost
@@ -25,10 +24,6 @@ class LogoIndex(DataMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         return self.get_mixin_context(super().get_context_data(**kwargs), title='This is logo')
-
-
-def login(request):
-    return django.shortcuts.HttpResponse("Login")
 
 
 class LogoAbout(DataMixin, ListView):
@@ -62,7 +57,7 @@ class ShowPost(DataMixin, DetailView):
 
 
 class ScriptCategory(DataMixin, ListView):
-    allow_empty = False
+    allow_empty = True
     template_name = 'logo_temps/script_cat.html'
     context_object_name = 'posts'
 
@@ -80,6 +75,7 @@ class ScriptCategory(DataMixin, ListView):
         return ScriptPost.published.filter(cat_id__slug=self.kwargs['cat_slug']).select_related('cat_id')
 
 
+@login_required
 def show_additional_info(request, id):
     return django.shortcuts.HttpResponse(f"<h1>Additional contact info with id: {id}</h1>")
 
@@ -105,9 +101,10 @@ class TagPostList(DataMixin, ListView):
                                            cat_id__slug=self.kwargs['cat_slug']).select_related('cat_id')
 
 
-class AddPage(DataMixin, CreateView):
+class AddPage(LoginRequiredMixin, PermissionRequiredMixin, DataMixin, CreateView):
     model = ScriptPost
     form_class = AddPostFullForm
+    permission_required = 'logo.add_scriptpost'
     template_name = 'logo_temps/add_page.html'
     success_url = reverse_lazy('home')
     title_page = 'Добавление записи'
@@ -116,8 +113,8 @@ class AddPage(DataMixin, CreateView):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             try:
-                # АВТОР
                 post = form.save(commit=False)
+                post.author = self.request.user
                 post.save()
 
                 tags = form.cleaned_data.get('tags')
@@ -142,9 +139,10 @@ class AddPage(DataMixin, CreateView):
         return render(request, self.template_name, {'form': form, **self.extra_context})
 
 
-class UpdatePage(DataMixin, UpdateView):
+class UpdatePage(LoginRequiredMixin, PermissionRequiredMixin, DataMixin, UpdateView):
     model = ScriptPost
     form_class = AddPostFullForm
+    permission_required = 'logo.change_scriptpost'
     template_name = 'logo_temps/add_page.html'
     success_url = reverse_lazy('home')
     title_page = 'Добавление записи'
@@ -159,6 +157,7 @@ class UpdatePage(DataMixin, UpdateView):
         if form.is_valid():
             try:
                 post = form.save(commit=False)
+                post.author = self.request.user
                 post.save()
 
                 tags = form.cleaned_data.get('tags')
@@ -192,9 +191,10 @@ class UpdatePage(DataMixin, UpdateView):
         return render(request, self.template_name, {'form': form, **self.extra_context})
 
 
-class DeletePage(DeleteView):
+class DeletePage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = ScriptPost
     template_name = 'logo_temps/confirm_delete.html'
+    permission_required = 'logo.delete_scriptpost'
     success_url = reverse_lazy('home')
 
     def get_object(self, queryset=None):
@@ -235,7 +235,7 @@ def upload(request):
     else:
         form = UploadFileForm()
 
-    return render(request, 'logo_temps/upload.html', {'title': 'Загрузка файлов', 'menu': menu, 'form': form})
+    return render(request, 'logo_temps/upload.html', {'title': 'Загрузка файлов', 'form': form})
 
 
 def page_not_found(request, exception):

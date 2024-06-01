@@ -6,10 +6,6 @@ from .admin import admin
 
 urlpatterns = [
     path('', views.LogoIndex.as_view(), name='home'),
-    path('login/', views.login, name='login'),
-    # path('categories/<int:cat_id>/', views.categories, name='categories_id'),
-    # path('categories/<slug:cat_slug>/', views.categories_by_slug, name='categories'),
-    # path('archive/<year4:year>/', views.archive, name='archive'),
     path('about/', views.LogoAbout.as_view(), name='about'),
     path('info/<int:id>', views.show_additional_info, name='info'),
     path('add_page/', views.AddPage.as_view(), name='create_post'),

@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 
@@ -26,7 +27,8 @@ class ScriptPost(models.Model):
     screenshot = models.ManyToManyField('Screenshots', blank=True, related_name='screenshots', verbose_name='Скриншоты')
     cat_id = models.ForeignKey('Category', on_delete=models.PROTECT, verbose_name='Категория')
     tags = models.ManyToManyField('TagPost', blank=True, related_name='tags', verbose_name='Тэги')
-    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True, blank=True, related_name='ascript', verbose_name='Автор')
+    author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='ascript', verbose_name='Автор', default=None)
 
     class Meta:
         verbose_name = 'Пользовательские публикации'
@@ -74,11 +76,3 @@ class TagPost(models.Model):
 
     def __str__(self):
         return self.tag
-
-
-class Author(models.Model):
-    username = models.CharField(max_length=255, unique=True)
-    sp_count = models.IntegerField(blank=True, default=0)
-
-    def __str__(self):
-        return self.username
