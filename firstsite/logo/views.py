@@ -4,16 +4,13 @@ import uuid
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views import View
-from .utils import DataMixin
-from django.core.paginator import Paginator
-from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView, DeleteView
+from .utils import DataMixin, IsOwnerMixin
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.core.files.storage import default_storage
 from django.shortcuts import render, get_object_or_404, redirect
-from django.template.defaultfilters import slugify
-from logo.models import ScriptPost, Category, TagPost, Screenshots
+from logo.models import ScriptPost, Category, TagPost, Screenshots, Comment, Like
 from django.urls import reverse, reverse_lazy
-from .forms import AddPostForm, UploadFileForm, AddPostFullForm
+from .forms import AddPostFullForm, CommentForm
 
 # Create your views here.
 
@@ -23,7 +20,7 @@ class LogoIndex(DataMixin, ListView):
     template_name = 'logo_temps/index.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        return self.get_mixin_context(super().get_context_data(**kwargs), title='This is logo')
+        return self.get_mixin_context(super().get_context_data(**kwargs), title='Coders` Hub')
 
 
 class LogoAbout(DataMixin, ListView):
@@ -34,8 +31,8 @@ class LogoAbout(DataMixin, ListView):
         data_db = [
             {'id': 1, 'title': 'Creator of site', 'content': 'Email: creator@gmail.com', 'is_private': True,
              'info': '+78888888888'},
-            {'id': 2, 'title': 'Support team', 'content': 'Our support team, which can help you!'
-                                                          '\nEmail: support_site@gmail.com', 'is_private': False,
+            {'id': 2, 'title': 'Поддержка', 'content': 'С радостью ответим на все ваши вопросы!'
+                                                          '\nEmail: django.badin@yandex.ru', 'is_private': False,
              'info': '+78888888881'}
         ]
         return self.get_mixin_context(super().get_context_data(**kwargs), title='О сайте', contacts=data_db)
@@ -50,6 +47,11 @@ class ShowPost(DataMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         post = context['post']
+        user_has_liked = False
+        if self.request.user.is_authenticated:
+            user_has_liked = Like.objects.filter(user=self.request.user, post=post).exists()
+        context['user_has_liked'] = user_has_liked
+        context['comment_form'] = CommentForm()
         return self.get_mixin_context(context, title=post.title, current_cat_slug=self.kwargs.get('cat_slug'))
 
     def get_object(self, queryset=None):
@@ -73,11 +75,6 @@ class ScriptCategory(DataMixin, ListView):
 
     def get_queryset(self):
         return ScriptPost.published.filter(cat_id__slug=self.kwargs['cat_slug']).select_related('cat_id')
-
-
-@login_required
-def show_additional_info(request, id):
-    return django.shortcuts.HttpResponse(f"<h1>Additional contact info with id: {id}</h1>")
 
 
 class TagPostList(DataMixin, ListView):
@@ -139,7 +136,7 @@ class AddPage(LoginRequiredMixin, PermissionRequiredMixin, DataMixin, CreateView
         return render(request, self.template_name, {'form': form, **self.extra_context})
 
 
-class UpdatePage(LoginRequiredMixin, PermissionRequiredMixin, DataMixin, UpdateView):
+class UpdatePage(LoginRequiredMixin, IsOwnerMixin, PermissionRequiredMixin, DataMixin, UpdateView):
     model = ScriptPost
     form_class = AddPostFullForm
     permission_required = 'logo.change_scriptpost'
@@ -191,7 +188,7 @@ class UpdatePage(LoginRequiredMixin, PermissionRequiredMixin, DataMixin, UpdateV
         return render(request, self.template_name, {'form': form, **self.extra_context})
 
 
-class DeletePage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class DeletePage(LoginRequiredMixin, IsOwnerMixin, PermissionRequiredMixin, DeleteView):
     model = ScriptPost
     template_name = 'logo_temps/confirm_delete.html'
     permission_required = 'logo.delete_scriptpost'
@@ -212,30 +209,73 @@ class DeletePage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-def handle_uploaded_file(f):
-    name = f.name
-    ext = ''
+class AddComment(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
 
-    if '.' in name:
-        ext = name[name.rindex('.'):]
-        name = name[:name.rindex('.')]
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = ScriptPost.objects.get(pk=self.kwargs.get('pk'))
+        return super().form_valid(form)
 
-    suffix = str(uuid.uuid4())
-
-    with open(f"uploads/{name}_{suffix}{ext}", "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+    def get_success_url(self):
+        post = ScriptPost.objects.get(pk=self.object.post.pk)
+        return reverse('show_post', args=[post.cat_id.slug, post.slug])
 
 
-def upload(request):
-    if request.method == "POST":
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            handle_uploaded_file(form.cleaned_data['file'])
-    else:
-        form = UploadFileForm()
+class EditComment(IsOwnerMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'logo_temps/comment_edit.html'
 
-    return render(request, 'logo_temps/upload.html', {'title': 'Загрузка файлов', 'form': form})
+    def get_success_url(self):
+        post = ScriptPost.objects.get(pk=self.object.post.pk)
+        return reverse('show_post', args=[post.cat_id.slug, post.slug])
+
+
+class DeleteComment(IsOwnerMixin, DeleteView):
+    model = Comment
+    template_name = 'logo_temps/comment_delete.html'
+
+    def get_success_url(self):
+        post = ScriptPost.objects.get(pk=self.object.post.pk)
+        return reverse('show_post', args=[post.cat_id.slug, post.slug])
+
+
+class LikePost(LoginRequiredMixin, View):
+    def post(self, request, post_slug):
+        post = get_object_or_404(ScriptPost, slug=post_slug)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if not created:
+            like.delete()
+            post.likes_count -= 1
+            post.save()
+        else:
+            post.likes_count += 1
+            post.save()
+
+        return redirect('show_post', post.cat_id.slug, post.slug)
+
+
+class ShowUserPosts(DataMixin, ListView):
+    allow_empty = True
+    template_name = 'logo_temps/script_cat.html'
+    context_object_name = 'posts'
+    model = ScriptPost
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = ScriptPost.objects.filter(author=user)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        for post in context['posts']:
+            post.url = reverse('show_post', args=[post.cat_id.slug, post.slug])
+
+        return self.get_mixin_context(context, title='Посты пользователя')
 
 
 def page_not_found(request, exception):

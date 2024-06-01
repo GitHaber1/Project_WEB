@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block comments %}
+    <div class="comments">
+        <h2>Редактирование комментария</h2>
+        <form method="post">
+            {% csrf_token %}
+            <p>{{ form.text }}</p>
+            <button type="submit">Изменить</button>
+            <a href="{% url 'show_post' cat_slug=object.post.cat_id.slug post_slug=object.post.slug %}">Отмена</a>
+        </form>
+    </div>
+{% endblock %}

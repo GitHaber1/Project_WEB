@@ -19,7 +19,7 @@ class ScriptPost(models.Model):
     time_create = models.DateTimeField(auto_now_add=True, verbose_name='Время создания')
     time_update = models.DateTimeField(auto_now=True, verbose_name='Время изменения')
     about = models.TextField(null=True, verbose_name='Описание', blank=True)
-    is_published = models.BooleanField(choices=tuple(map(lambda x:(bool(x[0]), x[1]), Status.choices)), default=Status.DRAFT, verbose_name='Статус')
+    is_published = models.BooleanField(choices=tuple(map(lambda x:(bool(x[0]), x[1]), Status.choices)), default=Status.PUBLISHED, verbose_name='Статус')
 
     objects = models.Manager()
     published = PublishedModel()
@@ -29,6 +29,7 @@ class ScriptPost(models.Model):
     tags = models.ManyToManyField('TagPost', blank=True, related_name='tags', verbose_name='Тэги')
     author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True,
                                related_name='ascript', verbose_name='Автор', default=None)
+    likes_count = models.PositiveIntegerField(default=0, verbose_name='Лайки')
 
     class Meta:
         verbose_name = 'Пользовательские публикации'
@@ -76,3 +77,27 @@ class TagPost(models.Model):
 
     def __str__(self):
         return self.tag
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, verbose_name='Пользователь')
+    post = models.ForeignKey(ScriptPost, on_delete=models.CASCADE, verbose_name='Пост', related_name='comments')
+    text = models.TextField(max_length=100, verbose_name='Комментарий')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Комментарий {self.author} к посту {self.post}'
+
+
+class Like(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    post = models.ForeignKey(ScriptPost, related_name='likes', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')

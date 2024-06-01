@@ -2,10 +2,10 @@
 
 {% block content %}
   <h1>Подтверждение удаления</h1>
-  <p>Вы уверены, что хотите удалить "{{ object }}"?</p>
+  <p class="com-info">Вы уверены, что хотите удалить "{{ object }}"?</p>
   <form method="post">
       {% csrf_token %}
       <input type="submit" value="Подтвердить удаление">
-      <a href="{% url 'home' %}">Отмена</a>
+      <a href="{% url 'show_post' cat_slug=object.cat_id.slug post_slug=object.slug %}">Отмена</a>
   </form>
 {% endblock %}

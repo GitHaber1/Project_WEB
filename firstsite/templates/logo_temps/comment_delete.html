@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block comments %}
+    <div class="comments">
+        <h2>Удаление комментария</h2>
+        <p class="com-info">Вы действительно хотите удалить комментарий?</p>
+        <pre class="com-info">{{ object.text }}</pre>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Удалить</button>
+            <a href="{% url 'show_post' cat_slug=object.post.cat_id.slug post_slug=object.post.slug %}">Отмена</a>
+        </form>
+    </div>
+{% endblock %}

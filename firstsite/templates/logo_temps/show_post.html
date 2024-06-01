@@ -3,7 +3,7 @@
 {% with post.tags.all as tags %}
 {% if tags %}
 <ul class="posttags-list">
-    <li>Tags:</li>
+    <li>Тэги:</li>
     {% for t in tags %}
     <li>
         <a href="{% url 'tag' cat_slug=current_cat_slug tag_slug=t.slug %}" class="tag">{{t.tag}}</a>
@@ -14,21 +14,48 @@
 {% endwith %}
 {% endblock posttag %}
 
+{% block likes %}
+    <h2 class="likes">Оцените публикацию</h2>
+    <form class="like-form" method="post" action="{% url 'like_post' post.slug %}">
+        {% csrf_token %}
+        <button class="like_button" type="submit">
+            {% if user.is_authenticated and user_has_liked %}
+                👎 Убрать лайк
+            {% else %}
+                👍 Поставить лайк
+            {% endif %}
+        </button>
+        <p class="likes-num">{{ post.likes_count }} Лайков</p>
+    </form>
+{% endblock likes %}
+
 {% block content %}
-<div>
+<div class="post-info">
+    {% if post.author == user %}
+    <div class="owners-a">
+        <a class="owner_func" href="{% url 'edit_page' post.id %}">Изменить</a>
+        <a class="owner_func" href="{% url 'delete_page' post.id %}">Удалить</a>
+    </div>
+    {% endif %}
     <h2>Код</h2>
-    <div>{{ post.content|linebreaksbr }}</div>
+    <form>{{ post.content|linebreaksbr }}</form>
     <h2>Описание</h2>
-    <div>{{ post.about|linebreaksbr }}</div>
+    <form>{{ post.about|linebreaksbr }}</form>
     {% if post.screenshot.all.exists %}
     <h2>Скриншоты</h2>
     <div class="screenshots">
-        <div class="screenshot-container">
+        <form class="screenshot-container">
         {% for screenshot in post.screenshot.all %}
-            <img src="{{ screenshot.screenshot.url }}" alt="Скриншот поста">
+            <a href="{{ screenshot.screenshot.url }}" target="_blank">
+                <img src="{{ screenshot.screenshot.url }}" alt="Скриншот поста">
+            </a>
         {% endfor %}
-        </div>
+        </form>
     </div>
     {% endif %}
 </div>
 {% endblock content %}
+
+{% block comments %}
+    {% include 'logo_temps/comments.html' with post=post comments=post.comments.all %}
+{% endblock comments %}

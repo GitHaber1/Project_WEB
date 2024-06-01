@@ -1,0 +1,41 @@
+<div class="comments">
+    <h2>Добавить комментарий:</h2>
+    {% if user.is_authenticated %}
+        <form method="post" enctype="multipart/form-data" action="{% url 'add_comment' pk=post.pk %}">
+            {% csrf_token %}
+            {{ comment_form.text }}
+            <button type="submit">Отправить</button>
+        </form>
+    {% else %}
+        <p class="com-info"><a href="{% url 'users:login' %}">Войдите</a>, чтобы добавить комментарий</p>
+    {% endif %}
+</div>
+<div class="comments">
+    <h2>Комментарии пользователей:</h2>
+    <form class="comment">
+        {% if comments %}
+        {% for com in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    {% if com.author.photo %}
+                        <img src="{{ com.author.photo.url }}" class="comment-author-img">
+                    {% else %}
+                        <img src="{{ '/media/users/def.png' }}" class="comment-author-img">
+                    {% endif %}
+                    <p>{{ com.author }} | {{ com.created_at }}</p>
+                </div>
+                <p>{{ com.text }}</p>
+                {% if com.author == user or user.is_superuser %}
+                    <div class="comment-links">
+                        <a href="{% url 'edit_comment' com.pk %}">Редактировать |</a>
+                        <a href="{% url 'delete_comment' com.pk %}">Удалить</a>
+                    </div>
+                {% endif %}
+            </div>
+            <hr>
+        {% endfor %}
+        {% else %}
+            <p>Нет комментариев</p>
+        {% endif %}
+    </form>
+</div>

@@ -1,26 +1,31 @@
 body {
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     color: whitesmoke;
     background-color: rgb(35, 35, 35);
+    margin: 0;
+    padding: 0;
+    display: flex;
 }
 
 h1 {          
+    text-align: center;
     color: whitesmoke;
 }
 
 li {
     font-size: 24px;
+    list-style-type: none;
 }
 
 p {
     font-size: 24px;
 }
 
-a:visited{
+a:visited {
     color: whitesmoke;
 }
 
-a:active{
+a:active {
     color: whitesmoke;
 }
 
@@ -32,40 +37,367 @@ label {
     margin: 3px;
 }
 
-.screenshot-container{
-    display: flex;
-}
-
-.screenshot-container img{
-    margin-right: 10px;
-    width: 300px;
-}
-
 a {   
-    text-decoration:underline;    
-    color:whitesmoke;
+    text-decoration: underline;    
+    color: whitesmoke;
     font-size: 24px;
 }
 
-.selected {
-    list-style-type: none;
-}
-
-.tag {
-    font-size: 15px;
-}
-
 .sidebar {
-    float: left;
-    background-color:rgb(18, 18, 18);
-    width: 300px;
-    font-size: 5px; 
+    background-color: rgb(22, 22, 22);
+    width: 250px;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
 }
 
+.main-hr {
+    border-color: blueviolet;
+}
+
+/* Стили для текстовых полей */
+input[type="text"], input[type="email"], input[type="password"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:disabled {
+    color: whitesmoke;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus {
+    border-color: #6a5acd;
+    box-shadow: 0 0 5px rgba(106, 90, 205, 0.5);
+    outline: none;
+}
+
+/* Стили для кнопок */
+button, input[type="submit"], .button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    background-color: #6a5acd;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+button:hover, input[type="submit"]:hover, .button:hover {
+    background-color: #483d8b;
+    box-shadow: 0 5px 15px rgba(72, 61, 139, 0.3);
+}
+
+/* Стили для полей и кнопок в форме */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #303030;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    margin-top: -15px;
+    margin-bottom: 10px;
+}
+
+/* Стиль для текста на главной странице*/
+.welcome-container {
+    width: 75rem;
+}
+
+/* Стили для контейнеров на главной странице*/
+.categories-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.category-box {
+    position: relative; 
+    background-color: #545454;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 30%;
+    margin: 20px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+}
+
+.category-box a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.category-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.category-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom right, rgba(0, 0, 255, 0.5), rgba(255, 0, 255, 0.5));
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+.category-box:hover::before {
+    opacity: 1;
+}
+
+.category-content {
+    position: relative;
+    padding: 20px;
+    z-index: 2; 
+}
+
+.category-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.category-content h2 {
+    margin: 20px 0 0;
+    font-size: 24px;
+}
+
+/* Стили для элементов меню */
+#mainmenu {
+    padding: 0;
+    margin: 0;
+    margin-left: -15px;
+}
+
+#mainmenu p {
+    font-size: 20px;
+    margin: 0px 0;
+}
+
+#mainmenu li {
+    list-style-type: none;
+    font-size: 20px;
+    margin: 0px 0;
+}
+
+#mainmenu li a {
+    font-size: 18px;
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: whitesmoke;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#mainmenu li a:hover, 
+#mainmenu li.selected a {
+    background-color: rgb(35, 35, 35);
+    color: blueviolet;
+}
+
+/* Профиль пользователя-фото */
+.user-photo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-photo img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Основные стили для списка постов */
+.post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.post-list li {
+    background-color: #545454;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    text-align: left;
+}
+
+.post-list li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(to bottom right, rgba(0, 0, 255, 0.5), rgba(255, 0, 255, 0.5)); 
+}
+
+.post-list h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    color: #fff;
+}
+
+.post-list .first {
+    font-size: 14px;
+    color: #ddd;
+    margin-bottom: 10px;
+}
+
+.post-list a {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #6a5acd;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.post-list a:hover {
+    background-color: #483d8b;
+}
+
+/* Стили для списка тегов */
+.posttags-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center; 
+}
+
+.posttags-list li, .comments a, form a, .owner_func {
+    display: inline-block; 
+    margin-right: 10px;
+}
+
+.posttags-list li:last-child, .comments a, form a, .owner_func {
+    margin-right: 0; 
+}
+
+.posttags-list li:first-child, .comments a, form a, .owner_func {
+    font-weight: bold; 
+}
+
+.posttags-list a, .comments a, form a, .owner_func {
+    text-decoration: none;
+    color: #6a5acd;
+    transition: color 0.3s;
+}
+
+.posttags-list a:hover, .comments a:hover, form a:hover, .owner_func:hover {
+    color: #483d8b;
+}
+
+/* Стили для поста */
+.post-info h2 {
+    text-align: center;
+}
+
+.owners-a {
+    text-align: center;
+    font-size: 35px;
+}
+
+.comments h2 {
+    text-align: center;
+}
+
+.likes {
+    text-align: center;
+}
+
+.screenshot-container img {    
+    max-width: 100%; 
+    height: auto; 
+}
+
+.like-form {
+    width: 120px;
+    height: 120px;
+}
+
+.like-form p {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.comments {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.com-info {
+    text-align: center;
+}
+
+.comment {
+    margin-bottom: 20px;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+}
+
+.comment-author-img {
+    width: 50px; 
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px; 
+}
+
+.comment-links {
+    display: inline;
+}
+
+/* Стиль для списка тэгов */
+.tags-list a {
+    margin-left: -25px;
+}
+
+/* Стиль для контейнера, в котором отображается весь контент*/
 .content {
-    margin-left: 340px; 
+    flex-grow: 1;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
+/* Стили для навигационной панели снизу страницы*/
 .list-pages ul {
     list-style: none;
     margin: 0;

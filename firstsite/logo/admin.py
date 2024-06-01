@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import ScriptPost, Category, Screenshots
+from .models import ScriptPost, Category, Screenshots, Comment
 from django.db.models import Q
 
 # Register your models here.
@@ -77,3 +77,10 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     list_display_links = ('id', 'name')
     list_per_page = 5
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('author', 'post', 'created_at', 'text')
+    list_display_links = ('author', 'post')
+    list_filter = ('author', 'post')

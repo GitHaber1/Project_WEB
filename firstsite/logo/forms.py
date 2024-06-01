@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category, TagPost, ScriptPost, Screenshots
+from .models import Category, TagPost, ScriptPost, Screenshots, Comment
 from django.core.validators import MinLengthValidator, MaxLengthValidator, ValidationError
 
 
@@ -69,3 +69,13 @@ class AddPostFullForm(AddPostForm):
 
 class UploadFileForm(forms.Form):
     file = forms.ImageField(label="Файл")
+
+
+class CommentForm(forms.ModelForm):
+    text = forms.CharField(widget=forms.Textarea(
+        attrs={'class': 'form-input'}
+    ), label='Текст комментария')
+
+    class Meta:
+        model = Comment
+        fields = ['text']
