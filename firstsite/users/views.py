@@ -65,7 +65,7 @@ class ProfileUser(LoginRequiredMixin, UpdateView):
         return self.request.user
 
 
-class UserPasswordChange(PasswordChangeView):
+class UserPasswordChange(LoginRequiredMixin, PasswordChangeView):
     form_class = UserPasswordChangeForm
     success_url = reverse_lazy("users:password_change_done")
     template_name = 'users_temps/password_change_form.html'

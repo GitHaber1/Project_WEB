@@ -67,10 +67,6 @@ class AddPostFullForm(AddPostForm):
         fields = AddPostForm.Meta.fields + ['screenshot']
 
 
-class UploadFileForm(forms.Form):
-    file = forms.ImageField(label="Файл")
-
-
 class CommentForm(forms.ModelForm):
     text = forms.CharField(widget=forms.Textarea(
         attrs={'class': 'form-input'}
